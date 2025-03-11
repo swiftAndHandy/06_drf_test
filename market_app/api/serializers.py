@@ -1,10 +1,13 @@
 from rest_framework import serializers
-from market_app.models import Market, Seller, Products
+from market_app.models import Market, Seller, Product
 
 
-class MarketSerializer(serializers.ModelSerializer):
+class MarketSerializer(serializers.HyperlinkedModelSerializer):
+    url = serializers.HyperlinkedIdentityField(
+        view_name='market_api:market-detail', lookup_field='pk'
+    )
 
-    sellers = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='seller_single')
+    sellers = serializers.HyperlinkedRelatedField(many=True, read_only=True, view_name='market_api:seller-detail')
 
     class Meta:
         model = Market
@@ -16,20 +19,31 @@ class SellerSerializer(serializers.ModelSerializer):
         queryset=Market.objects.all(),
         many=True,
         write_only=True,
-        source='markets'
+        source='markets',
     )
 
     class Meta:
         model = Seller
         fields = '__all__'
 
-class ProductSerializer(serializers.Serializer):
-    id = serializers.IntegerField(read_only=True)
-    name = serializers.CharField(max_length=100)
-    description = serializers.CharField()
-    price = serializers.DecimalField(decimal_places=2, max_digits=100)
-    seller = serializers.PrimaryKeyRelatedField(queryset=Seller.objects.all())
-    market = serializers.PrimaryKeyRelatedField(queryset=Market.objects.all())
+class ProductSerializer(serializers.ModelSerializer):
+    # seller = SellerSerializer(many=False, read_only=True)
 
-    def create(self, validated_data):
-        return Products.objects.create(**validated_data)
+    market_id = serializers.PrimaryKeyRelatedField(
+        queryset=Market.objects.all(),
+        source='market',
+        write_only=True,
+        required=True
+    )
+
+    seller_id = serializers.PrimaryKeyRelatedField(
+        queryset=Seller.objects.all(),
+        source='seller',
+        write_only=True,
+        required=True
+    )
+
+    class Meta:
+        model = Product
+        fields = '__all__'
+        depth = 1
