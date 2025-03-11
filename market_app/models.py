@@ -15,8 +15,8 @@ class Seller(models.Model):
     contact_info = models.TextField()
     markets = models.ManyToManyField(Market, related_name='sellers')
 
-    def __str__(self):
-        return self.name
+    # def __str__(self):
+    #     return self.name
 
 class Product(models.Model):
     name = models.CharField(max_length=100)
