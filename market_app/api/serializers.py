@@ -13,7 +13,7 @@ class MarketSerializer(serializers.HyperlinkedModelSerializer):
 
     class Meta:
         model = Market
-        fields = '__all__'
+        fields = ('id', 'url', 'name', 'description', 'location', 'sellers')
 
 class SellerSerializer(serializers.ModelSerializer):
     markets = MarketSerializer(many=True, read_only=True)
@@ -42,23 +42,8 @@ class SellerListSerializer(SellerSerializer, HyperlinkedModelSerializer):
         fields = ['url', 'name', 'market_count', 'contact_info']
 
 class ProductSerializer(serializers.ModelSerializer):
-    # seller = SellerSerializer(many=False, read_only=True)
-
-    market_id = serializers.PrimaryKeyRelatedField(
-        queryset=Market.objects.all(),
-        source='market',
-        write_only=True,
-        required=True
-    )
-
-    seller_id = serializers.PrimaryKeyRelatedField(
-        queryset=Seller.objects.all(),
-        source='seller',
-        write_only=True,
-        required=True
-    )
 
     class Meta:
         model = Product
         fields = '__all__'
-        depth = 1
+        # depth = 0

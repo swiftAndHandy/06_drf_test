@@ -1,40 +1,27 @@
+from django.db.migrations import serializer
 from django.shortcuts import get_object_or_404
-from rest_framework import status, generics, mixins
+from rest_framework import status, generics, viewsets
 from rest_framework.decorators import api_view
-from rest_framework.generics import RetrieveAPIView, RetrieveUpdateDestroyAPIView
+from rest_framework.generics import RetrieveUpdateDestroyAPIView
 from rest_framework.response import Response
 
 from market_app.api.serializers import MarketSerializer, SellerSerializer, \
     ProductSerializer, SellerListSerializer
 from market_app.models import Market, Seller, Product
 
-class MarketsView(mixins.ListModelMixin,
-                  mixins.CreateModelMixin,
-                  generics.GenericAPIView):
+# class MarketsView(mixins.ListModelMixin,
+#                   mixins.CreateModelMixin,
+#                   generics.GenericAPIView):
+#
+#     queryset = Market.objects.all()
+#     serializer_class = MarketSerializer
+#
+#     def get(self, request, *args, **kwargs):
+#         return self.list(request, *args, **kwargs)
+#     def post(self, request, *args, **kwargs):
+#         return self.create(request, *args, **kwargs)
 
-    queryset = Market.objects.all()
-    serializer_class = MarketSerializer
-
-    def get(self, request, *args, **kwargs):
-        return self.list(request, *args, **kwargs)
-    def post(self, request, *args, **kwargs):
-        return self.create(request, *args, **kwargs)
-
-
-# @api_view(['GET', 'POST'])
-# def markets_view(request):
-#     if request.method == 'GET':
-#         markets = Market.objects.all()
-#         serializer = MarketSerializer(markets, many=True, context={'request': request})
-#         return Response(serializer.data)
-#     elif request.method == 'POST':
-#         serializer = MarketSerializer(data=request.data)
-#         if serializer.is_valid():
-#             serializer.save()
-#             return Response(serializer.data, status=status.HTTP_201_CREATED)
-#         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-class MarketDetailView(RetrieveUpdateDestroyAPIView):
+class MarketViewSet(viewsets.ModelViewSet):
     queryset = Market.objects.all()
     serializer_class = MarketSerializer
 
@@ -45,6 +32,10 @@ class SellerOfMarketList(generics.ListAPIView):
         pk = self.kwargs['pk']
         market = get_object_or_404(Market, pk=pk)
         return market.sellers.all()
+
+class ProductViewSet(viewsets.ModelViewSet):
+    queryset = Product.objects.all()
+    serializer_class = ProductSerializer
 
 
 @api_view(['GET', 'POST'])
@@ -74,33 +65,4 @@ def sellers_single_view(request, pk):
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
     elif request.method == 'DELETE':
         seller.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
-
-@api_view(['GET', 'POST'])
-def product_view(request):
-    if request.method == 'GET':
-        products = Product.objects.all()
-        serializer = ProductSerializer(products, many=True, context={'request': request})
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = ProductSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def product_single_view(request, pk):
-    product = get_object_or_404(Product, pk=pk)
-    if request.method == 'GET':
-        serializer = ProductSerializer(product, context={'request': request})
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = ProductSerializer(product, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
-        product.delete()
         return Response(status=status.HTTP_204_NO_CONTENT)
