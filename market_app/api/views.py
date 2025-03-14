@@ -37,32 +37,20 @@ class ProductViewSet(viewsets.ModelViewSet):
     queryset = Product.objects.all()
     serializer_class = ProductSerializer
 
+class SellerViewSet(viewsets.ModelViewSet):
+    queryset = Seller.objects.all()
+    serializer_class = SellerSerializer
 
-@api_view(['GET', 'POST'])
-def sellers_view(request):
-    if request.method == 'GET':
-        sellers = Seller.objects.all()
-        serializer = SellerSerializer(sellers, many=True, context={'request': request})
-        return Response(serializer.data)
-    elif request.method == 'POST':
-        serializer = SellerSerializer(data=request.data)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_201_CREATED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-
-@api_view(['GET', 'PUT', 'DELETE'])
-def sellers_single_view(request, pk):
-    seller = get_object_or_404(Seller, pk=pk)
-    if request.method == 'GET':
-        serializer = SellerSerializer(seller, context={'request': request})
-        return Response(serializer.data)
-    elif request.method == 'PUT':
-        serializer = SellerSerializer(seller, data=request.data, partial=True)
-        if serializer.is_valid():
-            serializer.save()
-            return Response(serializer.data, status=status.HTTP_202_ACCEPTED)
-        return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    elif request.method == 'DELETE':
-        seller.delete()
-        return Response(status=status.HTTP_204_NO_CONTENT)
+# class SellerView(generics.ListAPIView):
+#     serializer_class = SellerSerializer
+#     queryset = Seller.objects.all()
+#     class Meta:
+#         model = Seller
+#         fields = '__all__'
+#
+# class SellerViewDetail(generics.RetrieveUpdateDestroyAPIView):
+#     serializer_class = SellerSerializer
+#     queryset = Seller.objects.all()
+#     class Meta:
+#         model = Seller
+#         fields = '__all__'
